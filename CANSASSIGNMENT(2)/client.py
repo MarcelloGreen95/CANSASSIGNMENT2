@@ -39,7 +39,7 @@ def main():
 
             with open(f"{path}", "r") as f:
                 text = f.read()
-                
+
             filename = path.split("/")[-1]
             send_data = f"{cmd}@{filename}@{text}"
             client.send(send_data.encode(FORMAT))
