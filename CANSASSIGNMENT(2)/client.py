@@ -1,11 +1,10 @@
-import socket, os, threading
+import socket
 
 IP = socket.gethostbyname(socket.gethostname())
-PORT = 4466
+PORT = 4456
 ADDR = (IP, PORT)
 SIZE = 1024
 FORMAT = "utf-8"
-SERVER_DATA_PATH = "server data"
 
 
 def main():
@@ -16,11 +15,10 @@ def main():
         data = client.recv(SIZE).decode(FORMAT)
         cmd, msg = data.split("@")
 
-        if cmd == "OK":
+        if cmd == "DISCONNECTED":
+            print(f"[SERVER]:{msg}")
+        elif cmd == "OK":
             print(f"{msg}")
-        elif cmd == "DISCONNECTED":
-            print(f"{msg}")
-            break
 
         data = input("> ")
         data = data.split(" ")
@@ -28,17 +26,29 @@ def main():
 
         if cmd == "HELP":
             client.send(cmd.encode(FORMAT))
+
         elif cmd == "LOGOUT":
             client.send(cmd.encode(FORMAT))
             break
+
         elif cmd == "LIST":
-            pass
+            client.send(cmd.encode(FORMAT))
+
         elif cmd == "UPLOAD":
-            pass
+            path = data[1]
+
+            with open(f"{path}", "r") as f:
+                text = f.read()
+                
+            filename = path.split("/")[-1]
+            send_data = f"{cmd}@{filename}@{text}"
+            client.send(send_data.encode(FORMAT))
+
         elif cmd == "DELETE":
-            pass
+            client.send(f"{cmd}@{data[1]}".encode(FORMAT))
 
     print("[DISCONNECTED] Disconnected from the server....")
+    client.close()
 
 
 if __name__ == "__main__":
